@@ -36,9 +36,22 @@ def hello_world():
         db.session.add(todo)
         db.session.commit()
     
-    # If the method is GET or after POST processing, render the template
-    show_all = Todo.query.all()
-    return render_template("index.html", show_all=show_all)
+    # for search functionality
+    search_query=request.args.get('search' , '')
+    totalTodos=db.session.query(Todo).count()
+    if search_query:
+        # Filter todos based on the search query
+        show_all = Todo.query.filter(
+            Todo.title.contains(search_query) | 
+            Todo.dsc.contains(search_query)
+        ).all()
+        
+    else:
+        # Show all todos if no search query is provided
+        show_all = Todo.query.all()
+        
+        
+    return render_template("index.html", show_all=show_all,totalTodos=totalTodos)
 
 
 # Route to display all todos
@@ -57,6 +70,7 @@ def delete(sno):
     db.session.commit()
     return redirect("/")
 
+# update todo
 
 @app.route("/update/<int:sno>", methods=['GET', 'POST'])
 def update(sno):
